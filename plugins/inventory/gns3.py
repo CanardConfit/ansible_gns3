@@ -224,6 +224,20 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 g = f"gns3_type_{node_type}"
                 self.inventory.add_group(g)
                 self.inventory.add_child(g, host)
+            
+            # Group by S[0-9], H[0-9], ...
+            m = re.match(r"^([A-Za-z]+)", node_name or "")
+            if m:
+                prefix = m.group(1)
+                prefix_map = {
+                    "S": "switches",
+                    "H": "hosts",
+                    "R": "routers",
+                    "C": "clouds",
+                }
+                g = prefix_map.get(prefix, prefix)
+                self.inventory.add_group(g)
+                self.inventory.add_child(g, host)
 
             hostvars = self.inventory.get_host(host).get_vars()
             self._set_composite_vars(self.get_option("compose"), hostvars, host, strict=strict)
